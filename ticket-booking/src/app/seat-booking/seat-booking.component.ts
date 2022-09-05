@@ -155,17 +155,20 @@ export class SeatBookingComponent implements OnInit {
     });
   }
   noOfTickets(value:any){
-    // this.loadData();
-    if(value == 0){
-      this.loadData();
-    }
-    console.log(value);
-    const selectedSeats = this.seatAvailable.filter(value => !value.isSelected);
-    console.log(selectedSeats,this.reservedSeats,value);
-   for(let i = 0;i<value;i++){
-    selectedSeats[i].isSelected = true;
-   }
-    console.log(this.seatAvailable);
+    this.seatService.getAllSeats().subscribe((data: any) => {
+        this.seatAvailable = data;
+        if(value == 0){
+          this.loadData();
+        }
+        console.log(value);
+        const selectedSeats = this.seatAvailable.filter(value => !value.isSelected);
+        console.log(selectedSeats,this.reservedSeats,value);
+       for(let i = 0;i<value;i++){
+        selectedSeats[i].isSelected = true;
+       }
+        console.log(this.seatAvailable);
+    })
+    
   }
 
   /** opens up popup to ask user details */
