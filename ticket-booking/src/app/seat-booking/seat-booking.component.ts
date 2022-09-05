@@ -17,11 +17,13 @@ import { UsersComponent } from '../users/users.component';
   styleUrls: ['./seat-booking.component.css']
 })
 export class SeatBookingComponent implements OnInit {
-  public rows: Array<String>;
-  public seats: Array<Number>;
-  public seatAvailable: Array<Seats>;
-  private reservedSeats: Array<String>;
-  private refresh: EventEmitter<void>;
+   rows: any;
+   seats:any;
+   seatAvailable:any;
+   reservedSeats:any;
+   refresh: EventEmitter<void>;
+  totalSeats = 80;
+  perRow = 7;
 
   constructor(
     public seatService: SeatServiceService,
@@ -31,19 +33,44 @@ export class SeatBookingComponent implements OnInit {
   ngOnInit() {
     this.refresh = new EventEmitter<void>();
     // Hardcoded for now to create seat arrangement for the first time
-    this.rows = ['A', 'B', 'C', 'D'];
-    this.seats = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    this.rows = [];
+    this.seats = [];
     this.loadData();
+    this.getCurrentSeats();
     // used to refresh screen
     this.refresh.subscribe(() => {
       this.loadData();
     });
-
+  }
+  getCurrentSeats() {
+    let count = 1;
+    let j:any = 0;
+    let row:any = ['A', 'B', 'C', 'D', 'E','F','G','H','I','J','K','L','M','N']
+    for (let i = 0; i < this.totalSeats; i++) {
+      if (count<=7 && this.totalSeats != i +1) {
+       this.seats.push(i+1)
+        count++;
+      }else{
+        if(this.totalSeats == i +1){
+          this.seats.push(i+1)
+        }
+        count = 2;
+        var data:any = {
+          name:row[j],
+          seats:this.seats
+        }
+        this.rows.push(data)
+        this.seats = [];
+        j++;
+        this.seats.push(i+1)
+      }
+    }
   }
 
   /** Used to load seat details */
   public loadData() {
     this.seatService.getAllSeats().subscribe((data: any) => {
+      console.log(data);
       if (data && data.length !== 0) {
         this.seatAvailable = data;
         this.getReservedSeats();
@@ -75,9 +102,9 @@ export class SeatBookingComponent implements OnInit {
   public addSeatDetails() {
     const seatsNumber = [];
 
-    this.rows.forEach((eachRow) => {
-      this.seats.forEach((eachSeat) => {
-        seatsNumber.push(new Seats(eachRow.concat(eachSeat.toString()), false));
+    this.rows.forEach((eachRow:any) => {
+      eachRow.seats.forEach((eachSeat:any) => {
+        seatsNumber.push(new Seats(eachRow.name.concat(eachSeat.toString()), false));
       })
     })
     this.seatService.addSeatsDetail(seatsNumber).subscribe((data: Array<Seats>) => {
@@ -102,6 +129,7 @@ export class SeatBookingComponent implements OnInit {
    * used to select seat whenever user clicks on seat
    */
   public seatSelect(seatNo: String) {
+    console.log(seatNo);
     this.toggleSeatSelect(seatNo);
 
   }
@@ -116,10 +144,28 @@ export class SeatBookingComponent implements OnInit {
 
   /** Used to submit the booking details */
   private submitBooking(selectedSeats) {
-    console.log('submitted');
+    console.log('submitted',selectedSeats);
     this.seatService.bookSeat(selectedSeats).subscribe(() => {
       this.refresh.emit();
+      const dialogRef = this.dialog.open(UsersComponent, {
+      width: '600px',
     });
+    dialogRef.afterClosed().subscribe((status) => {
+    })
+    });
+  }
+  noOfTickets(value:any){
+    // this.loadData();
+    if(value == 0){
+      this.loadData();
+    }
+    console.log(value);
+    const selectedSeats = this.seatAvailable.filter(value => !value.isSelected);
+    console.log(selectedSeats,this.reservedSeats,value);
+   for(let i = 0;i<value;i++){
+    selectedSeats[i].isSelected = true;
+   }
+    console.log(this.seatAvailable);
   }
 
   /** opens up popup to ask user details */
@@ -127,29 +173,29 @@ export class SeatBookingComponent implements OnInit {
     const selectedSeats = this.seatAvailable.filter(value => value.isSelected);
     // used to check if any new seat has been selected or not
     if (selectedSeats.length === this.reservedSeats.length) {
-      this.snackBar.open('Please select at leas one seat', 'dismiss', { duration: 1000 });
+      this.snackBar.open('Please select how many seats you need to reserve', 'dismiss', { duration: 1000 });
       return;
     }
-    const dialogRef = this.dialog.open(UsersComponent, {
-      width: '600px',
-    });
-    dialogRef.afterClosed().subscribe((status) => {
-      if (status === 'success') {
-        this.snackBar.open('Congrats! Email sent, Please check you email', 'dismiss', {
-          duration: 1000
-        });
+    // const dialogRef = this.dialog.open(UsersComponent, {
+    //   width: '600px',
+    // });
+    // dialogRef.afterClosed().subscribe((status) => {
+    //   if (status === 'success') {
+        // this.snackBar.open('Congrats! Email sent, Please check you email', 'dismiss', {
+        //   duration: 1000
+        // });
         this.submitBooking(selectedSeats);
-      } else if (status === 'fail') {
-        this.snackBar.open('Error occured. Please check your email settings/Network connection or please enable allow less secure app in gmail', 'dismiss');
-      } else {
-        this.snackBar.open('Failed please try again', 'dismiss', {
-          duration: 1000
-        });
-      }
+      // } else if (status === 'fail') {
+      //   this.snackBar.open('Error occured. Please check your email settings/Network connection or please enable allow less secure app in gmail', 'dismiss');
+      // } else {
+      //   this.snackBar.open('Failed please try again', 'dismiss', {
+      //     duration: 1000
+      //   });
+      // }
 
-    },
-      (err) => {
-        this.snackBar.open('Error occured. Please check your email settings and please enable allow less secure app in gmail');
-      });
+  //   },
+  //     (err) => {
+  //       this.snackBar.open('Error occured. Please check your email settings and please enable allow less secure app in gmail');
+  //     });
   }
 }

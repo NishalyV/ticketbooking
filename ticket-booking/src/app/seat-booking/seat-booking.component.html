@@ -3,18 +3,45 @@
  Created by - Ritesh Kant
 
 -->
+<div class="row">
+    <div class="col-2">
 
-<div style="width: 100px; margin: 20px auto; display: block;">
-    <span [ngClass]="{'seat-disabled': true}">reserved</span>
-    <span [ngClass]="{'seat-selected': true}">selected</span>
-    <span [ngClass]="{'seat-select':true}">available</span>
+    </div>
+    <div class="col-8" style="text-align: center;
+    font-size: larger;">Required no of seats:
+        <select id="tickets" name="tickets" #tickets form="tickets" (change)="noOfTickets(tickets.value)" style="width: 80px;
+        color: black;
+        background: azure;
+        text-align: center;">
+        <option value="0">--select--</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+          </select>
+        <div style="display: inline-flex;">
+            
+            <span [ngClass]="{'seat-disabled': true}">reserved</span>
+            <span [ngClass]="{'seat-selected': true}">selected</span>
+            <span [ngClass]="{'seat-select':true}">available</span>
+        </div> 
+    </div>
+    <div class="col-2">
+        
+    </div>
 </div>
+
+
+
 <div class="container-fluid">
     <table>
         <tr *ngFor="let row of rows">
-            <td *ngFor="let seat of seats">
-                <div [ngClass]="{'seat-select': !checkSeatStatus(row+''+seat), 'seat-selected':checkSeatStatus(row+''+seat), 'seat-disabled':isSeatReserved(row+''+seat)}"
-                    (click)="seatSelect(row+''+seat)">{{row+''+seat}}</div>
+            <td *ngFor="let seat of row.seats">
+                <div [ngClass]="{'seat-select': !checkSeatStatus(row.name+''+seat), 'seat-selected':checkSeatStatus(row.name+''+seat), 'seat-disabled':isSeatReserved(row.name+''+seat)}"
+                    style="cursor: no-drop;">{{row.name+''+seat}}</div>
             </td>
         </tr>
     </table>

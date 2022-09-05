@@ -12,7 +12,7 @@ const PORT = process.env.PORT || config.node.port;
 
 // Connect to mongodb
 
-mongoose.connect(config.mongo.url)
+mongoose.connect(config.mongo.url,{useUnifiedTopology:true,useNewUrlParser: true})
     .then(() => {
         console.log('connected to db');
     })
@@ -20,10 +20,7 @@ mongoose.connect(config.mongo.url)
         console.log(err)
     );
     
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
-mongoose.set('useUnifiedTopology', true);
+// mongoose.set('useNewUrlParser', true);
 
 // Used to prevent cors
 app.use(cors());
