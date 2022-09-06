@@ -198,7 +198,7 @@ export class SeatBookingComponent implements OnInit {
     } else{
       
   for(let i = 0; i< this.rows.length; i++){
-    console.log(i , this.rows.length);
+    console.log(res.filter(x=> x.rowNum == res[i].rowNum) , this.myModel);
     if(res.filter(x=> x.rowNum == res[i].rowNum).length >= this.myModel){
       const arr = res.filter(x=> x.rowNum == res[i].rowNum)
       for(let i = 0;i<this.myModel;i++){
