@@ -5,6 +5,8 @@
 export const environment = {
   production: false,
   baseUrl: 'https://nishaly-ticket-booking-api.herokuapp.com'
+  // baseUrl: 'http://localhost:9090'
+
 
 };
 

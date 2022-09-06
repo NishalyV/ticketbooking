@@ -17,13 +17,15 @@ import { UsersComponent } from '../users/users.component';
   styleUrls: ['./seat-booking.component.css']
 })
 export class SeatBookingComponent implements OnInit {
-   rows: any;
-   seats:any;
-   seatAvailable:any;
-   reservedSeats:any;
-   refresh: EventEmitter<void>;
+  rows: any;
+  seats: any;
+  seatAvailable: any;
+  reservedSeats: any;
+  refresh: EventEmitter<void>;
   totalSeats = 80;
   perRow = 7;
+
+  myModel: any;
 
   constructor(
     public seatService: SeatServiceService,
@@ -44,25 +46,25 @@ export class SeatBookingComponent implements OnInit {
   }
   getCurrentSeats() {
     let count = 1;
-    let j:any = 0;
-    let row:any = ['A', 'B', 'C', 'D', 'E','F','G','H','I','J','K','L','M','N']
+    let j: any = 0;
+    let row: any = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N']
     for (let i = 0; i < this.totalSeats; i++) {
-      if (count<=7 && this.totalSeats != i +1) {
-       this.seats.push(i+1)
+      if (count <= 7 && this.totalSeats != i + 1) {
+        this.seats.push(i + 1)
         count++;
-      }else{
-        if(this.totalSeats == i +1){
-          this.seats.push(i+1)
+      } else {
+        if (this.totalSeats == i + 1) {
+          this.seats.push(i + 1)
         }
         count = 2;
-        var data:any = {
-          name:row[j],
-          seats:this.seats
+        var data: any = {
+          name: row[j],
+          seats: this.seats
         }
         this.rows.push(data)
         this.seats = [];
         j++;
-        this.seats.push(i+1)
+        this.seats.push(i + 1)
       }
     }
   }
@@ -71,7 +73,9 @@ export class SeatBookingComponent implements OnInit {
   public loadData() {
     this.seatService.getAllSeats().subscribe((data: any) => {
       console.log(data);
+      
       if (data && data.length !== 0) {
+        
         this.seatAvailable = data;
         this.getReservedSeats();
       } else {
@@ -102,11 +106,12 @@ export class SeatBookingComponent implements OnInit {
   public addSeatDetails() {
     const seatsNumber = [];
 
-    this.rows.forEach((eachRow:any) => {
-      eachRow.seats.forEach((eachSeat:any) => {
-        seatsNumber.push(new Seats(eachRow.name.concat(eachSeat.toString()), false));
+    this.rows.forEach((eachRow: any,index:any) => {
+      eachRow.seats.forEach((eachSeat: any) => {
+        seatsNumber.push(new Seats(eachRow.name.concat(eachSeat.toString()), false,index));
       })
-    })
+    });
+    console.log(seatsNumber);
     this.seatService.addSeatsDetail(seatsNumber).subscribe((data: Array<Seats>) => {
       this.seatAvailable = data;
     });
@@ -144,61 +149,78 @@ export class SeatBookingComponent implements OnInit {
 
   /** Used to submit the booking details */
   private submitBooking(selectedSeats) {
-    console.log('submitted',selectedSeats);
+    console.log('submitted', selectedSeats);
     this.seatService.bookSeat(selectedSeats).subscribe(() => {
       this.refresh.emit();
       const dialogRef = this.dialog.open(UsersComponent, {
-      width: '600px',
-    });
-    dialogRef.afterClosed().subscribe((status) => {
-    })
+        width: '600px',
+      });
+      dialogRef.afterClosed().subscribe((status) => {
+        this.refresh.emit();
+      })
     });
   }
-  noOfTickets(value:any){
+  noOfTickets(value: any) {
     this.seatService.getAllSeats().subscribe((data: any) => {
-        this.seatAvailable = data;
-        if(value == 0){
-          this.loadData();
-        }
-        console.log(value);
-        const selectedSeats = this.seatAvailable.filter(value => !value.isSelected);
-        console.log(selectedSeats,this.reservedSeats,value);
-       for(let i = 0;i<value;i++){
+      this.seatAvailable = data;
+      if (value == 0) {
+        this.loadData();
+      }
+      console.log(value);
+      const selectedSeats = this.seatAvailable.filter(value => !value.isSelected);
+      console.log(selectedSeats, this.reservedSeats, value);
+      for (let i = 0; i < value; i++) {
         selectedSeats[i].isSelected = true;
-       }
-        console.log(this.seatAvailable);
+      }
+      console.log(this.seatAvailable);
     })
-    
+
   }
 
   /** opens up popup to ask user details */
   public openDialog(): void {
-    const selectedSeats = this.seatAvailable.filter(value => value.isSelected);
-    // used to check if any new seat has been selected or not
-    if (selectedSeats.length === this.reservedSeats.length) {
+    console.log(this.myModel == undefined, this.myModel > 7);
+    const notselectedSeats = this.seatAvailable.filter(value => !value.isSelected);
+ 
+  
+  var res = notselectedSeats.sort((a,b) => (a.seatNum > b.seatNum) ? 1 : ((b.seatNum > a.seatNum) ? -1 : 0))
+    if (this.myModel == undefined) {
       this.snackBar.open('Please select how many seats you need to reserve', 'dismiss', { duration: 1000 });
-      return;
+    } else if (this.myModel > 7) {
+      this.snackBar.open('You cannot able to book greater than 7 seats', 'dismiss', { duration: 1000 });
+    } else if(res.length < this.myModel){
+      this.snackBar.open(`We don't have enough seats we have only ${res.length} seat`, 'dismiss', { duration: 1000 });
+    } else if(res.length == this.myModel){
+      for(let i = 0;i<this.myModel;i++){
+        res[i].isSelected = true;
+            }
+            this.submitBooking(res);
+    } else{
+      
+  for(let i = 0; i< this.rows.length; i++){
+    console.log(i , this.rows.length);
+    if(res.filter(x=> x.rowNum == res[i].rowNum).length >= this.myModel){
+      const arr = res.filter(x=> x.rowNum == res[i].rowNum)
+      for(let i = 0;i<this.myModel;i++){
+        arr[i].isSelected = true;
+            }
+            this.submitBooking(arr);
+            break;
     }
-    // const dialogRef = this.dialog.open(UsersComponent, {
-    //   width: '600px',
-    // });
-    // dialogRef.afterClosed().subscribe((status) => {
-    //   if (status === 'success') {
-        // this.snackBar.open('Congrats! Email sent, Please check you email', 'dismiss', {
-        //   duration: 1000
-        // });
-        this.submitBooking(selectedSeats);
-      // } else if (status === 'fail') {
-      //   this.snackBar.open('Error occured. Please check your email settings/Network connection or please enable allow less secure app in gmail', 'dismiss');
-      // } else {
-      //   this.snackBar.open('Failed please try again', 'dismiss', {
-      //     duration: 1000
-      //   });
-      // }
+  }
+  // if(this.myModel>=res.filter(x=> x.rowNum == res[0].rowNum).length){
+  //  const arr = res.filter(x=> x.rowNum == parseInt(res[0].rowNum)+1);
+  //  console.log(arr)
+  //  const arrsort = arr.sort((a,b) => (a.seatNum > b.seatNum) ? 1 : ((b.seatNum > a.seatNum) ? -1 : 0));
+  //  console.log(arrsort);
+  //  for(let i = 0;i<this.myModel;i++){
+  //   arrsort[i].isSelected = true;
+  //       }
+  //       this.submitBooking(arrsort);  
+  // }
+      
+    }
 
-  //   },
-  //     (err) => {
-  //       this.snackBar.open('Error occured. Please check your email settings and please enable allow less secure app in gmail');
-  //     });
+
   }
 }

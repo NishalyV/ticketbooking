@@ -9,23 +9,16 @@
     </div>
     <div class="col-8" style="text-align: center;
     font-size: larger;">Required no of seats:
-        <select id="tickets" name="tickets" #tickets form="tickets" (change)="noOfTickets(tickets.value)" style="width: 80px;
-        color: black;
-        background: azure;
-        text-align: center;">
-        <option value="0">--select--</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-          </select>
+        <input type="text" [(ngModel)]="myModel"/>
+
         <div style="display: inline-flex;">
-            
+            <span style="background-color: green; color:white;cursor: pointer;
+            border-radius: 3px;
+            margin: 10px;
+            padding: 10px;
+            text-align: center;" (click)="openDialog()">Book Now</span>
             <span [ngClass]="{'seat-disabled': true}">reserved</span>
-            <span [ngClass]="{'seat-selected': true}">selected</span>
+            
             <span [ngClass]="{'seat-select':true}">available</span>
         </div> 
     </div>
@@ -40,10 +33,10 @@
     <table>
         <tr *ngFor="let row of rows">
             <td *ngFor="let seat of row.seats">
-                <div [ngClass]="{'seat-select': !checkSeatStatus(row.name+''+seat), 'seat-selected':checkSeatStatus(row.name+''+seat), 'seat-disabled':isSeatReserved(row.name+''+seat)}"
+                <div [ngClass]="{'seat-select': !checkSeatStatus(row.name+''+seat),'seat-disabled':isSeatReserved(row.name+''+seat)}"
                     style="cursor: no-drop;">{{row.name+''+seat}}</div>
             </td>
         </tr>
     </table>
-    <button (click)="openDialog()" id="submitButton">Book Seat</button>
+    <!-- <button  id="submitButton">Book Seat</button> -->
 </div>

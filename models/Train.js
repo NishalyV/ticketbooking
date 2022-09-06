@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 var CinemaSchema = new mongoose.Schema({
     seatNum: String,
     isSelected: Boolean,
+    rowNum:String
 });
 
 module.exports = mongoose.model('cinema', CinemaSchema);
